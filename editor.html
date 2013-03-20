@@ -1,0 +1,133 @@
+<!--
+
+  A simple expression to ilustrate use of urturn API.
+
+  This expression use JQuery / Jquery UI and bootstrap.
+
+  This expression add a sticker in top of an image.
+
+  You can choose the sticker positon by drag and drop.
+
+  It's online here :
+
+  http://www.urturn.com/pld/rocks
+  
+-->
+<body>
+
+<!--
+  We create some HTML markup
+-->
+<div id='main' style='text-align :center; width : 100%'>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <p class="lead">Let's Rock! <br/>
+    First add an Image !
+  </p>
+  <input type='button' class='btn btn-primary' value='Add an image' id='addImage'/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+</div>
+
+<!--
+  Here is the expression script 
+-->
+<script type="text/javascript">
+var post = null;
+var postWidth = 0;
+var rocks = null;
+
+// Called when expression is ready to use.
+UT.Expression.ready(function(pst){
+  // Ugly but convinient, we set the post as global
+  post = pst; 
+
+  // We set the note of the post
+  post.note = 'This #rocks!';
+
+  // Trick here : we will work with squared image.
+  // postWidth will also be use to determin post height.
+  postWidth = $('#main')[0].offsetWidth;
+  post.resize({height : $('#main')[0].offsetHeight});
+
+  // we handle user click on addImage button
+  $('#addImage').on('click', addAnImage);
+});
+
+// Called when add an image button is pressed
+function addAnImage() {
+  // we call a image dialog for a 600 * 600 squared image
+  post.dialog('image', {size : {width : 600, height : 600}}, imageAdded)
+}
+
+// Called when an image is added
+function imageAdded(img) {
+  // If user close the library or abort image selection process
+  // then null is retun here. In this case we just abord image
+  // insertion and do nothing
+  if (img == null) {
+     return;
+  }
+   
+  // We clean the HTML markup
+  $('#main').html('');
+
+  // We change height of post to width (we want a squared post)
+  post.resize({height : postWidth});
+
+  // We set the background image
+  var imgObj = $('<img/>')
+                  .attr('src', img.url)
+                  .css({width : postWidth , height : postWidth})
+  $('#main').append(imgObj);
+
+  // we prepare the sticker
+  rocks = $('<img/>')
+                  .attr('src', './rocks.png')
+                  .css({position : 'absolute', top : 10, left : 10, width : 200, height : 200});
+  $('#main').append(rocks);
+
+  // see jquery ui doc for draggable
+  rocks.draggable({
+      containment: "#main",
+      scroll: false,
+      stop: updateSticker});
+
+  // We save the background image to use in play mode
+  post.storage.image = img;
+  
+  // we update stiker position
+  updateSticker();
+}
+
+function updateSticker(){
+
+  // we get sticker position
+  var pos = rocks.offset();
+
+  // We transform this position into %
+  // same for sticker size
+  var left = 100 / postWidth * pos.left | 0;
+  var top = 100 / postWidth * pos.top | 0;
+  var stickerSize = 100 / postWidth * 200 | 0;
+
+  // We save sticker position and size in %
+  post.storage.top = top;
+  post.storage.left = left;
+  post.storage.stickerSize = stickerSize;
+
+  // we ask API to save storage
+  post.storage.save();
+
+  // we can now post this post :-)
+  post.valid(true);
+}
+
+</script>
+</body>

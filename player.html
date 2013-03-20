@@ -1,0 +1,30 @@
+<div id='main' style='width : 100%'>
+</div>
+
+<script type="text/javascript">
+
+  UT.Expression.ready(function(post){
+  	
+  	var availableWidth = $('#main')[0].offsetWidth;
+  	post.resize({height: availableWidth});
+
+    var img = $('<img/>')
+      .attr('src', post.storage.image.url)
+      .css({width : availableWidth , height : availableWidth});
+
+    $('#main')
+      .append(img);
+
+    var sticker = $('<img/>')
+      .attr('src', './rocks.png')
+      .css({
+        position : 'absolute',
+        top : post.storage.top + '%',
+        left : post.storage.left + '%',
+        width : post.storage.stickerSize + '%'
+      });
+
+    $('#main')
+      .append(sticker);
+  });
+</script>
